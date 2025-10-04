@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { Link } from 'react-router-dom';
 
 const StartScreen = () => {
   const headingRef = useRef(null);
@@ -10,15 +11,8 @@ const StartScreen = () => {
   const dotsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let animationFrameId: number;
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
-      if (!animationFrameId) {
-        animationFrameId = requestAnimationFrame(updateDots);
-      }
-    };
-
-    function updateDots() {
       const minSize = 0;
       const maxSize = 6;
       if (dotsContainerRef.current) {
@@ -34,15 +28,16 @@ const StartScreen = () => {
           dot.style.height = `${size}px`;
         });
       }
-      animationFrameId = 0;
-    }
+    };
 
     window.addEventListener('mousemove', handleMouseMove);
-    
-    requestAnimationFrame(updateDots);
+
+    handleMouseMove({
+      clientX: window.innerWidth / 2,
+      clientY: window.innerHeight / 2
+    } as MouseEvent);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
@@ -54,7 +49,6 @@ const StartScreen = () => {
   ).fill(0);
 
   useGSAP(() => {
-    // Animate dots container: blur to sharp, scale, and a subtle rotation
     if (dotsContainerRef.current) {
       gsap.fromTo(
         dotsContainerRef.current,
@@ -102,7 +96,7 @@ const StartScreen = () => {
   }, []);
 
   return (
-  <section className='min-h-screen relative flex flex-col items-center justify-center bg-gradient-to-br from-[#0a0f1c] via-[#101a2b] via-60% to-[#0a0f1c] text-white font-sans tracking-tight'>
+  <section className='min-h-screen relative flex flex-col items-center justify-center text-white font-sans tracking-tight overflow-hidden'>
       <div ref={dotsContainerRef} className='absolute h-dvh w-dvw z-10 flex'>
         {rowsArray.map((_, rowIndex) => (
           <div key={rowIndex} className='flex flex-col flex-1'>
@@ -125,16 +119,16 @@ const StartScreen = () => {
       </div>
       <h1
         ref={headingRef}
-        className='z-20 text-center text-4xl p-2 md:text-6xl font-semibold mb-10 tracking-tight bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-600 bg-clip-text text-transparent drop-shadow-xl'
+        className='z-20 text-center text-4xl p-2 md:text-6xl font-semibold mb-10 tracking-tight bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-700 bg-clip-text text-transparent drop-shadow-xl'
       >
         What's Going On With Bitcoin?
       </h1>
-      <button
+      <Link to={'/main'}
         ref={buttonRef}
-        className='z-20 px-8 py-3 rounded-full bg-gray-900 hover:bg-blue-400 hover:text-black transition-colors duration-200 shadow-lg border-2 border-blue-400 text-lg tracking-wide cursor-pointer'
+        className='z-20 px-8 py-3 rounded-full bg-gray-950 hover:bg-blue-400 hover:text-black transition-colors duration-200 shadow-lg border-2 border-blue-400 text-lg tracking-wide cursor-pointer'
       >
         Get A Snapshot
-      </button>
+      </Link>
     </section>
   );
 };
