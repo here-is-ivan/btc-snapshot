@@ -3,11 +3,11 @@ import type { OrderBook } from '../types/OrderBookType';
 const TopBidsAsksTable = ({ orderBook }: { orderBook: OrderBook | null }) => {
   if (!orderBook) return <div className='text-gray-500'>Loading...</div>;
 
-  const topBids = orderBook.bids.slice(0, 3);
-  const topAsks = orderBook.asks.slice(0, 3);
+  const topBids = orderBook.bids.slice(0, 5);
+  const topAsks = orderBook.asks.slice(0, 5);
 
   return (
-    <div className='flex flex-col md:flex-row gap-4 min-h-[50dvh] items-stretch'>
+    <div className='flex flex-col md:flex-row gap-4 items-stretch'>
       {/* Bids Column */}
       <div className='flex-1 flex flex-col bg-zinc-900 rounded-lg shadow p-4 border border-zinc-800'>
         <div className='flex justify-between mb-2 border-b border-zinc-700 pb-1'>
@@ -20,7 +20,7 @@ const TopBidsAsksTable = ({ orderBook }: { orderBook: OrderBook | null }) => {
             className='flex justify-between py-2 border-b last:border-b-0 border-zinc-800 text-green-300'
           >
             <span>{parseFloat(price).toLocaleString()}</span>
-            <span>{parseFloat(size).toLocaleString()}</span>
+            <span>{parseFloat(size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 8 })}</span>
           </div>
         ))}
       </div>
@@ -36,7 +36,7 @@ const TopBidsAsksTable = ({ orderBook }: { orderBook: OrderBook | null }) => {
             className='flex justify-between py-2 border-b last:border-b-0 border-zinc-800 text-red-300'
           >
             <span>{parseFloat(price).toLocaleString()}</span>
-            <span>{parseFloat(size).toLocaleString()}</span>
+            <span>{parseFloat(size).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 8 })}</span>
           </div>
         ))}
       </div>

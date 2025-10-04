@@ -2,30 +2,28 @@ import { useEffect, useState } from 'react';
 
 import PriceChart from '../components/PriceChart';
 import OrderbookDepthChart from '../components/OrderbookDepthChart';
-import BidsAsksPie from '../components/BidsAsksPie';
+import PriceLadder from '../components/PriceLadder';
+import RecentTradesFeed from '../components/RecentTradesFeed';
 import TopBidsAsksTable from '../components/TopBidsAsksTable';
 import BuyCalculator from '../components/BuyCalculator';
 
-type OrderBook = {
-  bids: [string, string, string][];
-  asks: [string, string, string][];
-};
-
-type Ticker = {
-  price: string;
-  open: string;
-  high: string;
-  low: string;
-  volume: string;
-};
+import type { OrderBook } from '../types/OrderBookType';
+import type { Trade } from '../types/TradeType';
 
 const MainPage = () => {
   const [orderBook, setOrderBook] = useState<OrderBook | null>(null);
-  const [ticker, setTicker] = useState<Ticker | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [priceHistory, setPriceHistory] = useState<
     { time: number; price: number }[]
   >([]);
+  const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
+  // fetch recent trades (snapshot)
+  useEffect(() => {
+    fetch('https://api.exchange.coinbase.com/products/BTC-USD/trades')
+      .then((res) => res.json())
+      .then((data) => setRecentTrades(data.slice(0, 10)))
+      .catch(() => {});
+  }, []);
 
   // fetch orderbook
   useEffect(() => {
@@ -35,17 +33,6 @@ const MainPage = () => {
         return res.json();
       })
       .then((data) => setOrderBook({ bids: data.bids, asks: data.asks }))
-      .catch((err) => setError(err.message));
-  }, []);
-
-  // fetch ticker info
-  useEffect(() => {
-    fetch('https://api.exchange.coinbase.com/products/BTC-USD/ticker')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch ticker');
-        return res.json();
-      })
-      .then((data) => setTicker(data))
       .catch((err) => setError(err.message));
   }, []);
 
@@ -75,7 +62,7 @@ const MainPage = () => {
 
   if (error) return null;
 
-  const isLoading = !orderBook || !ticker || priceHistory.length === 0;
+  const isLoading = !orderBook || priceHistory.length === 0;
 
   if (isLoading) {
     return (
@@ -127,16 +114,6 @@ const MainPage = () => {
           </h1>
           <p className='text-gray-400 text-lg'>Bitcoin data from Coinbase</p>
         </div>
-        {ticker && (
-          <div className='flex flex-col items-end mt-4 md:mt-0'>
-            <span className='text-2xl md:text-4xl font-mono font-bold text-green-400'>
-              ${parseFloat(ticker.price).toLocaleString()}
-            </span>
-            <span className='text-xs text-gray-400'>
-              24h Vol: {parseFloat(ticker.volume).toLocaleString()} BTC
-            </span>
-          </div>
-        )}
       </header>
 
       <main className='w-full max-w-5xl flex flex-col gap-10'>
@@ -145,15 +122,16 @@ const MainPage = () => {
           <PriceChart data={priceHistory} />
         </div>
         <div className='bg-gray-950 rounded-xl shadow-lg p-8 flex flex-col'>
-          <h2 className='text-xl font-semibold mb-4'>Orderbook Depth</h2>
+          <h2 className='text-xl font-semibold mb-4'>Recent Trades (Snapshot)</h2>
+          <RecentTradesFeed trades={recentTrades} />
+        </div>
+        <div className='bg-gray-950 rounded-xl shadow-lg p-8 flex flex-col'>
+          <h2 className='text-xl font-semibold mb-4'>Orderbook Depth (first 100)</h2>
           <OrderbookDepthChart orderBook={orderBook} />
+          <PriceLadder orderBook={orderBook} levels={15} />
         </div>
         <div className='bg-gray-950 rounded-xl shadow-lg p-8 flex flex-col'>
-          <h2 className='text-xl font-semibold mb-4'>Bids vs Asks (Pie)</h2>
-          <BidsAsksPie orderBook={orderBook} />
-        </div>
-        <div className='bg-gray-950 rounded-xl shadow-lg p-8 flex flex-col'>
-          <h2 className='text-xl font-semibold mb-4'>Top 3 Bids & Asks</h2>
+          <h2 className='text-xl font-semibold mb-4'>Top 5 Bids & Asks</h2>
           <TopBidsAsksTable orderBook={orderBook} />
         </div>
         <div className='bg-gray-950 rounded-xl shadow-lg p-8 flex flex-col'>

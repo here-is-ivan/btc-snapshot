@@ -22,10 +22,10 @@ const OrderbookDepthChart: React.FC<OrderbookDepthChartProps> = ({
 
     // Prepare depth data
     const bids = orderBook.bids
-      .slice(0, 30)
+      .slice(0,100)
       .map(([p, s]) => [parseFloat(p), parseFloat(s)]);
     const asks = orderBook.asks
-      .slice(0, 30)
+      .slice(0, 100)
       .map(([p, s]) => [parseFloat(p), parseFloat(s)]);
     let bidDepth = 0,
       askDepth = 0;
@@ -51,7 +51,22 @@ const OrderbookDepthChart: React.FC<OrderbookDepthChartProps> = ({
         d3.max([...bidCumulative, ...askCumulative], (d) => d.size)! * 1.05,
       ])
       .range([height - margin.bottom, margin.top]);
-    // Bids
+    // Bids Area (semi-transparent)
+    svg
+      .append('path')
+      .datum(bidCumulative)
+      .attr('fill', '#22c55e')
+      .attr('fill-opacity', 0.1)
+      .attr('stroke', 'none')
+      .attr(
+        'd',
+        d3
+          .area<{ price: number; size: number }>()
+          .x((d) => x(d.price))
+          .y0(y(0))
+          .y1((d) => y(d.size))
+      );
+    // Bids Line
     svg
       .append('path')
       .datum(bidCumulative)
@@ -65,7 +80,22 @@ const OrderbookDepthChart: React.FC<OrderbookDepthChartProps> = ({
           .x((d) => x(d.price))
           .y((d) => y(d.size))
       );
-    // Asks
+    // Asks Area (semi-transparent)
+    svg
+      .append('path')
+      .datum(askCumulative)
+      .attr('fill', '#ef4444')
+      .attr('fill-opacity', 0.1)
+      .attr('stroke', 'none')
+      .attr(
+        'd',
+        d3
+          .area<{ price: number; size: number }>()
+          .x((d) => x(d.price))
+          .y0(y(0))
+          .y1((d) => y(d.size))
+      );
+    // Asks Line
     svg
       .append('path')
       .datum(askCumulative)
@@ -92,7 +122,7 @@ const OrderbookDepthChart: React.FC<OrderbookDepthChartProps> = ({
       .attr('color', '#888');
   }, [orderBook]);
 
-  return <svg ref={ref} className='w-full h-[50dvh]' style={{ width: '100%' }} />;
+  return <svg ref={ref} className='w-full h-[50dvh]' />;
 };
 
 export default OrderbookDepthChart;
