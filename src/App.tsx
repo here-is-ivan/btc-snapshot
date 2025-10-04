@@ -1,5 +1,11 @@
+import StartScreen from './pages/StartScreen';
+
 const App = () => {
-  return <></>;
-}
+  return (
+    <>
+      <StartScreen />
+    </>
+  );
+};
 
 export default App;
